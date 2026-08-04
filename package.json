@@ -1,0 +1,24 @@
+{
+  "name": "tazz-sign",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "generate:pdf": "node scripts/generate-pdf.mjs",
+    "deploy": "npm run build && npx wrangler deploy"
+  },
+  "dependencies": {
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-router-dom": "^6.28.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.3.3",
+    "pdfkit": "^0.15.2",
+    "vite": "^5.4.11",
+    "wrangler": "^4.26.0"
+  }
+}

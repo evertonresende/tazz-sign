@@ -1,0 +1,16 @@
+{
+  // Verificação de assinatura digital — serviço temporário em sign.tazz.app
+  // Deploy manual: npm run deploy (não há CI; repo efêmero)
+  "name": "tazz-sign",
+  "account_id": "6b9d106f19c6fc536146e7e5487198fe",
+  "compatibility_date": "2026-08-04",
+  "workers_dev": true,
+  "routes": [{ "pattern": "sign.tazz.app", "custom_domain": true }],
+  "assets": {
+    "directory": "./dist",
+    "not_found_handling": "single-page-application"
+  },
+  "observability": {
+    "enabled": true
+  }
+}

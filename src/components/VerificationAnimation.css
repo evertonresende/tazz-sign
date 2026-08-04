@@ -1,0 +1,171 @@
+.verification {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.verification__logo-wrap {
+  position: relative;
+  width: 120px;
+  height: 120px;
+  display: grid;
+  place-items: center;
+  margin-bottom: 1.25rem;
+}
+
+.verification__logo {
+  position: relative;
+  z-index: 2;
+  height: 3rem;
+  width: auto;
+}
+
+.verification__ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 2px solid transparent;
+}
+
+.verification--checking .verification__ring--outer {
+  border-top-color: rgba(197, 255, 62, 0.85);
+  border-right-color: rgba(197, 255, 62, 0.25);
+  animation: spin 1.4s linear infinite;
+}
+
+.verification--checking .verification__ring--inner {
+  inset: 12px;
+  border-bottom-color: rgba(197, 255, 62, 0.55);
+  animation: spin 1s linear infinite reverse;
+}
+
+.verification--checking .verification__logo {
+  animation: pulse 1.6s ease-in-out infinite;
+}
+
+.verification--valid .verification__ring--outer {
+  border-color: rgba(197, 255, 62, 0.35);
+  animation: pop 0.45s ease-out;
+}
+
+.verification--invalid .verification__ring--outer {
+  border-color: rgba(255, 120, 120, 0.35);
+}
+
+.verification__check,
+.verification__cross {
+  position: absolute;
+  right: 4px;
+  bottom: 4px;
+  z-index: 3;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  animation: pop 0.35s ease-out;
+}
+
+.verification__check {
+  background: #c5ff3e;
+  color: #0a0a0a;
+}
+
+.verification__cross {
+  background: #ff6b6b;
+  color: #0a0a0a;
+}
+
+.verification__check svg,
+.verification__cross svg {
+  width: 18px;
+  height: 18px;
+}
+
+.verification__status {
+  margin: 0 0 0.35rem;
+  font-family: Outfit, Inter, sans-serif;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.verification__hint {
+  margin: 0;
+  font-size: 0.85rem;
+  color: rgba(245, 245, 245, 0.55);
+  line-height: 1.45;
+}
+
+.verification__progress {
+  width: min(100%, 220px);
+  height: 4px;
+  margin-top: 1rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+}
+
+.verification__progress span {
+  display: block;
+  width: 40%;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, transparent, #c5ff3e, transparent);
+  animation: slide 1.2s ease-in-out infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(0.96);
+    opacity: 0.85;
+  }
+}
+
+@keyframes pop {
+  from {
+    transform: scale(0.6);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes slide {
+  from {
+    transform: translateX(-120%);
+  }
+  to {
+    transform: translateX(320%);
+  }
+}
+
+.verification--valid + .verify__details,
+.verification--invalid + .verify__details {
+  animation: fadeUp 0.45s ease-out;
+}
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
