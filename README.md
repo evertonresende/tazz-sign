@@ -30,3 +30,32 @@ npm run deploy         # build + wrangler deploy
 ## Desativar
 
 Quando não precisar mais: delete o worker `tazz-sign` no dashboard Cloudflare ou remova a route `sign.tazz.app`.
+
+## Contracheque / payment statement (POC)
+
+Gerador de demonstrativo de pagamento no formato americano. Os dados de folha vêm de um
+JSON — o PDF só renderiza o que está lá, nada é calculado ou presumido.
+
+```bash
+npm run generate:paystub                       # usa scripts/paystub.data.json (ou o .example)
+node scripts/generate-paystub.mjs caminho.json # arquivo avulso
+npm test                                       # self-check das somas e das guardas
+```
+
+Saída: `docs/paystub-<statementNo>.pdf`. Exemplo renderizado: `docs/paystub-exemplo.pdf`.
+
+### Dois modos, por `payee.classification`
+
+| Modo | Quando | O que sai no PDF |
+|---|---|---|
+| `contractor` | prestador no exterior (1099-NEC / W-8BEN) | "CONTRACTOR PAYMENT STATEMENT", sem retenção; nota dizendo que não evidencia vínculo empregatício nos EUA |
+| `employee` | folha americana real, com EIN e retenção | "EARNINGS STATEMENT" com tabela de Federal / FICA / Medicare / estadual |
+
+Guardas que o script aplica (falham na geração, não no papel):
+
+- `contractor` com linha de dedução → erro. Retenção de imposto americano só existe em folha real.
+- `deposit.last4` que não seja exatamente 4 dígitos → erro. **Número de conta completo nunca entra no documento nem no JSON.**
+- Líquido negativo, ou centavos não inteiros → erro. Todo valor é inteiro em centavos.
+
+`scripts/paystub.data.json` é gitignorado — dados reais de pagamento e banco ficam fora do
+repo. O commitado é só o `.example`.

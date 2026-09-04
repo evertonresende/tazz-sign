@@ -1,0 +1,31 @@
+{
+  "currency": "USD",
+  "employer": {
+    "name": "TAZZ Inc.",
+    "address": ["1209 Orange Street", "Wilmington, DE 19801", "United States of America"],
+    "ein": null
+  },
+  "payee": {
+    "name": "Full Name Here",
+    "address": ["Street, number", "City, State", "Brazil"],
+    "workerId": "TZ-0001",
+    "taxIdLast4": null,
+    "classification": "contractor"
+  },
+  "period": {
+    "start": "2026-08-01",
+    "end": "2026-08-31",
+    "payDate": "2026-09-05",
+    "statementNo": "2026-08-0001"
+  },
+  "earnings": [
+    { "description": "Professional services", "rate": null, "units": null, "amountCents": 0, "ytdCents": 0 }
+  ],
+  "deductions": [],
+  "deposit": {
+    "bankName": "Bank name",
+    "accountType": "Checking",
+    "last4": "0000"
+  },
+  "notes": []
+}

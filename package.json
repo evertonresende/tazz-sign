@@ -8,7 +8,9 @@
     "build": "vite build",
     "preview": "vite preview",
     "generate:pdf": "node scripts/generate-pdf.mjs",
-    "deploy": "npm run build && npx wrangler deploy"
+    "deploy": "npm run build && npx wrangler deploy",
+    "generate:paystub": "node scripts/generate-paystub.mjs",
+    "test": "node scripts/generate-paystub.mjs --check"
   },
   "dependencies": {
     "react": "^18.3.1",
