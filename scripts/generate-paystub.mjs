@@ -335,7 +335,10 @@ if (arg === '--check') {
     : [path.join(__dirname, 'paystub.data.json'), path.join(__dirname, 'paystub.data.example.json')].find(fs.existsSync)
   const data = JSON.parse(fs.readFileSync(dataPath, 'utf8'))
   validate(data)
-  const outputPath = path.join(root, 'docs', `paystub-${data.period.statementNo}.pdf`)
+  // nome carrega quem recebe: dois PDFs de layout idêntico e dados diferentes se confundem
+  const slug = data.payee.name.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
+  const outputPath = path.join(root, 'docs', `paystub-${slug}-${data.period.statementNo}.pdf`)
   fs.mkdirSync(path.dirname(outputPath), { recursive: true })
   render(data, outputPath).then((p) => console.log(`PDF gerado: ${p}\nFonte: ${dataPath}`))
 }
