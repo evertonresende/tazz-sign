@@ -101,8 +101,11 @@ function render(data, outputPath) {
   if (fs.existsSync(logoPath)) doc.image(logoPath, left + 18, headerY + 20, { width: 86 })
   doc.font('Helvetica-Bold').fontSize(9).fillColor('#FFFFFF')
     .text(data.employer.name, left + width - 290, headerY + 14, { width: 272, align: 'right' })
-  doc.font('Helvetica').fontSize(7.5).fillColor('#AAAAAA')
-    .text(data.employer.address.join(' · '), left + width - 290, headerY + 27, { width: 272, align: 'right', lineGap: 1 })
+  const employerAddress = data.employer.address ?? []
+  if (employerAddress.length) {
+    doc.font('Helvetica').fontSize(7.5).fillColor('#AAAAAA')
+      .text(employerAddress.join(' · '), left + width - 290, headerY + 27, { width: 272, align: 'right', lineGap: 1 })
+  }
   if (data.employer.ein) {
     doc.font('Helvetica').fontSize(7.5).fillColor(COLORS.accent)
       .text(`EIN ${data.employer.ein}`, left + width - 290, headerY + 52, { width: 272, align: 'right' })
@@ -125,7 +128,7 @@ function render(data, outputPath) {
 
   // Employer / payee panels
   const panelY = doc.y
-  const employerLines = [data.employer.name, ...data.employer.address]
+  const employerLines = [data.employer.name, ...employerAddress]
   const payeeIdLine = [data.payee.workerId && `ID ${data.payee.workerId}`, data.payee.taxIdLast4 && `Tax ID •••${data.payee.taxIdLast4}`].filter(Boolean).join('   ')
   const payeeLines = [data.payee.name, ...data.payee.address, payeeIdLine].filter(Boolean)
   const panelH = 39 + Math.max(employerLines.length, payeeLines.length) * 11 + 8

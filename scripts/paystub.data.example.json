@@ -2,7 +2,7 @@
   "currency": "USD",
   "employer": {
     "name": "TAZZ Inc.",
-    "address": ["1209 Orange Street", "Wilmington, DE 19801", "United States of America"],
+    "address": ["Delaware, United States of America"],
     "ein": null
   },
   "payee": {

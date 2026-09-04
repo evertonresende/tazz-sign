@@ -57,6 +57,11 @@ Guardas que o script aplica (falham na geração, não no papel):
 - `deposit.last4` que não seja exatamente 4 dígitos → erro. **Número de conta completo nunca entra no documento nem no JSON.**
 - Líquido negativo, ou centavos não inteiros → erro. Todo valor é inteiro em centavos.
 
+`employer.address` é opcional — ausente, só o nome da empresa aparece. Não preencher com
+endereço de agente registrado: o agente é prestador de serviço, e o endereço dele no papel
+diz que a empresa fica lá. Use o endereço comercial da própria TAZZ Inc., o mesmo que está
+na conta bancária e no cadastro da IRS.
+
 `ytdCents: null` sai como `—`, não como `$0.00`: acumulado do ano ou é número real ou não
 aparece. `deposit: null` omite o bloco de depósito inteiro.
 
