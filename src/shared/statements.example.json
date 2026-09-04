@@ -1,0 +1,18 @@
+{
+  "00000000-0000-4000-8000-000000000000": {
+    "type": "paystub",
+    "issuer": "TAZZ Inc.",
+    "payeeName": "Sample Contractor",
+    "classification": "contractor",
+    "statementNo": "DEMO-2026-08",
+    "periodStart": "2026-08-01",
+    "periodEnd": "2026-08-31",
+    "payDate": "2026-09-05",
+    "currency": "USD",
+    "grossCents": 528000,
+    "deductionsCents": 0,
+    "netCents": 528000,
+    "issuedAt": "2026-09-04",
+    "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+  }
+}

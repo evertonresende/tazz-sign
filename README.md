@@ -67,3 +67,28 @@ aparece. `deposit: null` omite o bloco de depósito inteiro.
 
 `scripts/paystub.data.json` e os PDFs gerados são gitignorados — dados reais de pagamento,
 banco e endereço ficam fora do repo. Commitados só o `.example` e o `paystub-exemplo.pdf`.
+
+### Verificação em sign.tazz.app
+
+Cada demonstrativo gerado ganha um UUID aleatório e entra no registro do emissor
+(`src/shared/statements.json`), que a página de verificação consulta. O PDF imprime só a URL;
+quem confere abre o link e compara.
+
+O que a página mostra, e por quê:
+
+- **Os valores e o período**, pra bater contra o papel em mãos.
+- **Digest SHA-256 do PDF original.** É o que realmente detecta adulteração: quem recebeu o
+  arquivo roda `shasum -a 256 arquivo.pdf` e compara. Um centavo trocado muda o hash inteiro.
+  O digest **não** é impresso no PDF — um arquivo não pode conter o próprio hash, e imprimir
+  um valor que o portador poderia editar junto com o resto não provaria nada.
+
+O registro guarda nome, período e valores. **Não guarda endereço nem dado bancário** — não
+provam nada na conferência e vazariam junto se o link vazasse.
+
+⚠️ **Regenerar um demonstrativo muda o digest.** O `verificationId` fica salvo no
+`paystub.data.json` e é reaproveitado, então o link sobrevive; mas o PDF novo tem hash novo e
+o registro passa a apontar pra ele. Cópia já entregue a terceiro passa a não bater. Regerar só
+antes de entregar, ou emitir com `statementNo` novo.
+
+`src/shared/statements.json` é gitignorado — é payroll de gente real, e **este repo é público**.
+Clone limpo cai no `statements.example.json` e valida só o documento de demonstração.

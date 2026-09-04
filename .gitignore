@@ -5,3 +5,4 @@ dist/
 *.log
 scripts/paystub.data.json
 docs/paystub-*.pdf
+src/shared/statements.json

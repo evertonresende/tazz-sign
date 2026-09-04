@@ -1,6 +1,7 @@
 import fs from 'node:fs'
 import path from 'node:path'
 import assert from 'node:assert/strict'
+import crypto from 'node:crypto'
 import { fileURLToPath } from 'node:url'
 import PDFDocument from 'pdfkit'
 
@@ -19,6 +20,8 @@ const COLORS = {
 }
 
 const MARGIN = 42
+const VERIFY_BASE_URL = 'https://sign.tazz.app'
+const REGISTRY_PATH = path.join(__dirname, '..', 'src', 'shared', 'statements.json')
 
 // ── Money: integer cents everywhere, formatted only at render time ──────────
 function money(cents, currency = 'USD') {
@@ -270,6 +273,19 @@ function render(data, outputPath) {
     doc.y = depY + 42 + 14
   }
 
+  if (data.verificationId) {
+    const vY = doc.y
+    doc.roundedRect(left, vY, width, 52, 5).fillAndStroke('#FFFFFF', COLORS.border)
+    label('Verification', left + 12, vY + 10, width - 24)
+    doc.font('Helvetica').fontSize(8).fillColor(COLORS.body).text(
+      'Confirm this statement against the issuer record — the page shows the amounts and a SHA-256 digest of the original file.',
+      left + 12, vY + 21, { width: width - 24, lineGap: 1.5 },
+    )
+    doc.font('Helvetica-Bold').fontSize(8.5).fillColor('#1F4D00')
+      .text(`${VERIFY_BASE_URL}/${data.verificationId}`, left + 12, vY + 40, { width: width - 24 })
+    doc.y = vY + 52 + 12
+  }
+
   ;(data.notes ?? []).forEach((n) => {
     doc.font('Helvetica').fontSize(8).fillColor(COLORS.body).text(n, left, doc.y, { width, lineGap: 2 })
     doc.y += 4
@@ -326,6 +342,35 @@ function selfCheck() {
   console.log('self-check ok')
 }
 
+/**
+ * Registro do emissor: o que sign.tazz.app consulta.
+ * Guarda só o que um terceiro precisa pra conferir o papel — nunca o endereço
+ * do recebedor nem dado bancário, que não provam nada e vazam se o link vazar.
+ */
+function upsertRegistry(data, t, pdfPath) {
+  const digest = crypto.createHash('sha256').update(fs.readFileSync(pdfPath)).digest('hex')
+  const registry = fs.existsSync(REGISTRY_PATH) ? JSON.parse(fs.readFileSync(REGISTRY_PATH, 'utf8')) : {}
+  registry[data.verificationId] = {
+    type: 'paystub',
+    issuer: data.employer.name,
+    payeeName: data.payee.name,
+    classification: data.payee.classification,
+    statementNo: data.period.statementNo,
+    periodStart: data.period.start,
+    periodEnd: data.period.end,
+    payDate: data.period.payDate,
+    currency: data.currency ?? 'USD',
+    grossCents: t.grossCents,
+    deductionsCents: t.deductionsCents,
+    netCents: t.netCents,
+    issuedAt: new Date().toISOString().slice(0, 10),
+    sha256: digest,
+  }
+  fs.mkdirSync(path.dirname(REGISTRY_PATH), { recursive: true })
+  fs.writeFileSync(REGISTRY_PATH, JSON.stringify(registry, null, 2) + '\n')
+  return digest
+}
+
 const arg = process.argv[2]
 if (arg === '--check') {
   selfCheck()
@@ -335,10 +380,21 @@ if (arg === '--check') {
     : [path.join(__dirname, 'paystub.data.json'), path.join(__dirname, 'paystub.data.example.json')].find(fs.existsSync)
   const data = JSON.parse(fs.readFileSync(dataPath, 'utf8'))
   validate(data)
+  // ID estável: link já impresso e distribuído não pode morrer numa regeneração
+  if (!data.verificationId) {
+    data.verificationId = crypto.randomUUID()
+    fs.writeFileSync(dataPath, JSON.stringify(data, null, 2) + '\n')
+  }
   // nome carrega quem recebe: dois PDFs de layout idêntico e dados diferentes se confundem
   const slug = data.payee.name.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
     .toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
   const outputPath = path.join(root, 'docs', `paystub-${slug}-${data.period.statementNo}.pdf`)
   fs.mkdirSync(path.dirname(outputPath), { recursive: true })
-  render(data, outputPath).then((p) => console.log(`PDF gerado: ${p}\nFonte: ${dataPath}`))
+  render(data, outputPath).then((p) => {
+    const digest = upsertRegistry(data, totals(data), p)
+    console.log(`PDF gerado: ${p}\nFonte: ${dataPath}`)
+    console.log(`Verificação: ${VERIFY_BASE_URL}/${data.verificationId}`)
+    console.log(`SHA-256: ${digest}`)
+    console.log(`Registro: ${REGISTRY_PATH}`)
+  })
 }
