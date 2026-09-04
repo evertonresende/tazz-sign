@@ -42,8 +42,8 @@ function totals(data) {
     grossCents,
     deductionsCents,
     netCents,
-    grossYtdCents: sum(data.earnings, 'ytdCents'),
-    deductionsYtdCents: sum(data.deductions ?? [], 'ytdCents'),
+    grossYtdCents: data.earnings.every((e) => e.ytdCents == null) ? null : sum(data.earnings, 'ytdCents'),
+    deductionsYtdCents: (data.deductions ?? []).every((d) => d.ytdCents == null) ? null : sum(data.deductions ?? [], 'ytdCents'),
   }
 }
 
@@ -125,20 +125,15 @@ function render(data, outputPath) {
 
   // Employer / payee panels
   const panelY = doc.y
-  const panelH = 84
+  const employerLines = [data.employer.name, ...data.employer.address]
+  const payeeIdLine = [data.payee.workerId && `ID ${data.payee.workerId}`, data.payee.taxIdLast4 && `Tax ID •••${data.payee.taxIdLast4}`].filter(Boolean).join('   ')
+  const payeeLines = [data.payee.name, ...data.payee.address, payeeIdLine].filter(Boolean)
+  const panelH = 39 + Math.max(employerLines.length, payeeLines.length) * 11 + 8
   const gap = 12
   const panelW = (width - gap) / 2
   ;[
-    { title: 'Paid by', lines: [data.employer.name, ...data.employer.address] },
-    {
-      title: data.payee.classification === 'employee' ? 'Employee' : 'Contractor',
-      lines: [
-        data.payee.name,
-        ...data.payee.address,
-        [data.payee.workerId && `ID ${data.payee.workerId}`, data.payee.taxIdLast4 && `Tax ID •••${data.payee.taxIdLast4}`]
-          .filter(Boolean).join('   '),
-      ].filter(Boolean),
-    },
+    { title: 'Paid by', lines: employerLines },
+    { title: data.payee.classification === 'employee' ? 'Employee' : 'Contractor', lines: payeeLines },
   ].forEach((panel, i) => {
     const x = left + i * (panelW + gap)
     doc.roundedRect(x, panelY, panelW, panelH, 5).fillAndStroke('#FFFFFF', COLORS.border)
@@ -209,7 +204,7 @@ function render(data, outputPath) {
       e.rate == null ? '—' : money(e.rate, cur),
       e.units == null ? '—' : String(e.units),
       money(e.amountCents, cur),
-      money(e.ytdCents ?? 0, cur),
+      e.ytdCents == null ? '—' : money(e.ytdCents, cur),
     ]),
   )
 
@@ -219,7 +214,7 @@ function render(data, outputPath) {
     table(
       'Taxes and deductions',
       [['Description', w[0] + w[1] + w[2]], ['Current', w[3], 'right'], ['Year to date', w[4], 'right']],
-      (data.deductions ?? []).map((d) => [d.description, money(d.amountCents, cur), money(d.ytdCents ?? 0, cur)]),
+      (data.deductions ?? []).map((d) => [d.description, money(d.amountCents, cur), d.ytdCents == null ? '—' : money(d.ytdCents, cur)]),
     )
   } else {
     const noteY = doc.y
@@ -239,8 +234,8 @@ function render(data, outputPath) {
   const sumH = 46
   doc.rect(left, sumY, width, sumH).fillAndStroke(COLORS.panel, COLORS.border)
   const cells = [
-    ['Gross pay', money(t.grossCents, cur), money(t.grossYtdCents, cur)],
-    ['Deductions', money(t.deductionsCents, cur), money(t.deductionsYtdCents, cur)],
+    ['Gross pay', money(t.grossCents, cur), t.grossYtdCents == null ? null : money(t.grossYtdCents, cur)],
+    ['Deductions', money(t.deductionsCents, cur), t.deductionsYtdCents == null ? null : money(t.deductionsYtdCents, cur)],
     ['Net pay', money(t.netCents, cur), null],
   ]
   cells.forEach(([l, v, ytd], i) => {
@@ -320,6 +315,10 @@ function selfCheck() {
 
   // full account numbers are rejected outright
   assert.throws(() => validate({ ...base, deposit: { last4: '123456789' } }), /exactly 4 digits/)
+
+  const noYtd = totals({ earnings: [{ amountCents: 300000 }], deductions: [] })
+  assert.equal(noYtd.grossYtdCents, null, 'absent YTD must stay absent, never render as $0.00')
+  assert.equal(noYtd.netCents, 300000)
 
   console.log('self-check ok')
 }

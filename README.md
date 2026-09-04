@@ -57,5 +57,8 @@ Guardas que o script aplica (falham na geração, não no papel):
 - `deposit.last4` que não seja exatamente 4 dígitos → erro. **Número de conta completo nunca entra no documento nem no JSON.**
 - Líquido negativo, ou centavos não inteiros → erro. Todo valor é inteiro em centavos.
 
-`scripts/paystub.data.json` é gitignorado — dados reais de pagamento e banco ficam fora do
-repo. O commitado é só o `.example`.
+`ytdCents: null` sai como `—`, não como `$0.00`: acumulado do ano ou é número real ou não
+aparece. `deposit: null` omite o bloco de depósito inteiro.
+
+`scripts/paystub.data.json` e os PDFs gerados são gitignorados — dados reais de pagamento,
+banco e endereço ficam fora do repo. Commitados só o `.example` e o `paystub-exemplo.pdf`.
